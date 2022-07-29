@@ -3,3 +3,10 @@
 
 
 CHR-2 Code taken from Foutz TJ, Arlow RL, McIntyre CC (2012) Theoretical principles underlying optical stimulation of a channelrhodopsin-2 positive pyramidal neuron
+
+
+## Instructions for Using this Model
+
+First run the Foutz model at this link [Foutz TJ, Arlow RL, McIntyre CC (2012) Theoretical principles underlying optical stimulation of a channelrhodopsin-2 positive pyramidal neuron] (https://github.com/risecourse/Foutz2012)
+
+Then run the "OpticalStimulation.py".
