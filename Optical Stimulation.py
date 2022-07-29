@@ -83,8 +83,10 @@ def check():
 
 # <codecell>
 
-from classes_ROSTest import Hu
+from classes import Hu, Optrode, Sim
 cell = Hu()
+optrode = Optrode(h.soma)
+sim = Sim(cell,optrode,output_filename='csv/distance_threshold.csv')
 # print("2: " + check())
 
 # <headingcell level=1>
@@ -125,14 +127,77 @@ cell = Hu()
 # print("3: " + check())
 
 from matplotlib import pyplot
+from classes import Data
+from functions import make_legend
+# print("4: " + check())
+
+# Simulation
+ds = Data('csv/distance_threshold.orig.csv')
+ds.sort('Distance (um)')
+
+# Strength-Distance
+fig = pyplot.figure(figsize=(3.5,2.5))
+styles = iter(['b--','g-.','r'])
+for f in [0.1,0.2,0.4]:
+    ds.set_slice(ds.data['Fiber Optic Diameter (mm)']==f)
+    pyplot.semilogy(ds.slice['Distance (um)'],ds.slice['Threshold (W/cm2)'],
+                    styles.__next__(),
+                    label='%.1f' % f)
+pyplot.plot([1400], [38.0], '*', color='0.5',label='Aravanis (0.2)') # Aravanis data point
+pyplot.xlabel('Distance (um)')
+pyplot.ylabel('Threshold (W/cm2)')
+pyplot.xlim([0,2000])
+
+# <headingcell level=1>
+
+# Visualize Simulation Rig
+
+# <markdowncell>
+
+# 2D visualization of the neuron geometry can be done in matplotlib using the cell's *plot* method. The *plot* method generates the cell's trajectory with a color overlay determined by an arbitrary input function that is run for each NEURON section. In this example, the input function returns the section's intracellular voltage.
+
+# <codecell>
+# print("5: " + check())
+
+from matplotlib import pyplot
 plot_func = lambda sec:sec.v
 h.run()
 cell.plot(plot_func)
 pyplot.show()
 
-# <codecell>
-# print("5: " + check())
-
 # <markdowncell>
 
 # 3D visualization of the neuron geometry requires Mayavi, a 3d visualization library based on VTK. It is done with a *display* method. Again, the color is determined by an arbitary function run on each NEURON section (here I use the same function as above). The optical fiber can also be represented using a *display* method.
+
+# <codecell>
+
+cell.display(plot_func)
+optrode.display(bounds=[[-1000,1000],[-1000,1000],[0,2000]])
+
+# <headingcell level=1>
+
+# Move Neuron
+
+# <markdowncell>
+
+# To move the neuron in space, just use the *move* method. Here we move by 50 um along each axis. Here we stop the simulation during the light pulse at time 4 ms so that we can plot the irradiance of the section.
+
+# <codecell>
+
+from mayavi import mlab
+mlab.figure()
+cell.move([50,50,50])
+h.tstop = 4
+h.run()
+plot_func = lambda sec:sec.irradiance_chanrhod
+cell.display(plot_func)
+optrode.display(bounds=[[-1000,1000],[-1000,1000],[0,2000]])
+
+# <headingcell level=1>
+
+# Further Questions
+
+# <markdowncell>
+
+# Please see the source code and manuscript for more information regarding the model and simulation design. Feel free to contact the authors if additional code resources are needed.
+
