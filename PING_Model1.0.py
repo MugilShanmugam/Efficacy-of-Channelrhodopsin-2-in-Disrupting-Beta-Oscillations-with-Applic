@@ -3,7 +3,7 @@
 """
 Created on Sat Jul 30 16:50:22 2022
 
-@author: Aiden Lee, Jeffery Wen, Mugil Shanmugam, Dr. Bezaire
+@author: Aiden Lee, Jeffrey Wen, Mugil Shanmugam, Dr. Bezaire
 """
 
 from neuron import h, gui
