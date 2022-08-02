@@ -117,11 +117,12 @@ for i, cell in enumerate(my_cells):
     if cell._cell_type == "Inhibitory":
         inhibitory_con = []
         for j, value in enumerate(connection_matrix[i]):
-            if value == 1:
+            if value == 1 and my_cells[j]._cell_type == "Excitatory":
                 inhibitory_con.append(j)
-                print (j)
+            if value == 1 and my_cells[j]._cell_type == "Inhibitory":
+                connection_matrix[i][j] = 0
         for index in random.sample(inhibitory_con, len(inhibitory_con)//2):
-                 connection_matrix[i][index] = 0
+            connection_matrix[i][index] = 0
                 
             
 
