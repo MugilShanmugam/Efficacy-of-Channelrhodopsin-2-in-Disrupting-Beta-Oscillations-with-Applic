@@ -3,7 +3,7 @@
 """
 Created on Sat Jul 30 16:50:22 2022
 
-@author: aidenlee
+@author: Aiden Lee, Jeffery Wen, Mugil Shanmugam, Dr. Bezaire
 """
 
 from neuron import h, gui
@@ -131,8 +131,23 @@ print(connection_matrix)
 
 #Set up stimulations
 
-# TODO Set an iclamp to each cell
-
+# Set an iclamp to each cell
+#Does this Clamp go throughout the simulation?
+for cell in my_cells:
+    stimClamp = h.IClamp(cell.soma(0.5))
+    stimClamp.delay = 5
+    stimClamp.dur = 100
+    stimClamp.amp = 0.11
+'''
+    else:
+        stimClamp = h.IClamp(cell.soma(0.5))
+        stimClamp.delay = 5
+        stimClamp.dur = 100
+        stimClamp.amp = 0.3
+'''
+     # if cell._cell_type == "Excitatory":
+    #Amp between 0.034 and 0.165 for 10 cells
+    #Amp seems to vary depending on number of neurons in network
 # set a synaptic input onto my_cells[0]
 # from an artificial stim cell
 syn_ = h.ExpSyn(my_cells[0].dend(0.5))
@@ -142,7 +157,7 @@ stim.number = 1     #Assigned number of stimulation
 stim.start = 9      #start of stimulus in ms
 ncstim = h.NetCon(stim, syn_)   #Looks at potential of stim, and once that hits threshold, triggers syn_
 ncstim.delay = 1 * ms           #1 ms delay to model time for NTs or signal propogation
-ncstim.weight[0] = 0.04       #how strong the transmittions is from pre to post synapse
+ncstim.weight[0] = 0.04       #how strong the transmission is from pre to post synapse
 
 syn_.tau = 2 * ms
 
@@ -171,12 +186,12 @@ for row in con_loc:
    # syn = h.ExpSyn(target.dend(0.5))   #syn is the synapse and later appended to list syns
     if source._cell_type == "Excitatory":
         nc = h.NetCon(source.soma(0.5)._ref_v, target.esyn, sec=source.soma)    #Still need help understanding netcons
-        nc.weight[0] = 0.055    #strength of connection between pre and post cells (maximum conductance)
+        nc.weight[0] = 0.1    #strength of connection between pre and post cells (maximum conductance)
         nc.delay = 5            #ms - delay between presynaptic cell reaching threshold and postsynaptic cell triggering (time to propogate down axon and NT)
                                 #if planning to try to shorten frequency of gamma waves in ping model, probably mess around with tau (decay factor of synapse) rather than delay
     else: # Inhibitory
         nc = h.NetCon(source.soma(0.5)._ref_v, target.isyn, sec=source.soma)    #Still need help understanding netcons
-        nc.weight[0] = 0.055    #strength of connection between pre and post cells (maximum conductance)
+        nc.weight[0] = 0.25    #strength of connection between pre and post cells (maximum conductance)
         nc.delay = 5            #ms - delay between presynaptic cell reaching threshold and postsynaptic cell triggering (time to propogate down axon and NT)
                                 #if planning to try to shorten frequency of gamma waves in ping model, probably mess around with tau (decay factor of synapse) rather than delay
 
