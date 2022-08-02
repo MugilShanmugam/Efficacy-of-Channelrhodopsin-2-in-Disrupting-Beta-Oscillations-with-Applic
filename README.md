@@ -14,4 +14,4 @@ Step 2:
 Then run the "OpticalStimulationStripped.py" file in this repository.
 
 Step 3:
-Run PING_Model1.0 to access our network of excitatory and inhibitory cells.
+Run PING_Model1.0.py to access our network of excitatory and inhibitory cells. Run Scaled-Up Composite Rhythm.py to see all the spiking of the 100 neurons in the network on one graph.
