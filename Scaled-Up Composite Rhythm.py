@@ -37,6 +37,7 @@ class Cell:         #Creation of a generic class called cell
             #self.all is all the sections of the neuron
             #more future proof than creating a list of only soma and dendrite
         self._setup_biophysics(cell_type)       #Runs biophysics definition but with input of cell_type to determine biophysics
+        self._setup_IClamp(cell_type)
         self.x = self.y = self.z = 0   
         h.define_shape()                     
         self._set_position(x, y, z)
@@ -57,6 +58,17 @@ class Cell:         #Creation of a generic class called cell
 class BallAndStick(Cell):
     #Creation of subclass under cell so BallAndStick will have methods defined under both Cell and BallAndStick
     #Both init and repr removed because they are already defined in Cell
+    def _setup_IClamp(self, cell_type):
+        if cell_type == "e":
+            self.stimClampE = h.IClamp(self.soma(0.5))
+            self.stimClampE.delay = 5
+            self.stimClampE.dur = 100
+            self.stimClampE.amp = 0.032
+        else:
+            self.stimClampI = h.IClamp(self.soma(0.5))
+            self.stimClampI.delay = 5
+            self.stimClampI.dur = 100
+            self.stimClampI.amp = 0.032
     def _setup_morphology(self):
         self.soma = h.Section(name='soma', cell=self)
         self.dend = h.Section(name='dend', cell=self)
@@ -140,11 +152,11 @@ print(connection_matrix)
 
 # Set an iclamp to each cell
 #Does this Clamp go throughout the simulation?
-for cell in my_cells:
-    stimClamp = h.IClamp(cell.soma(0.5))
-    stimClamp.delay = 5
-    stimClamp.dur = 100
-    stimClamp.amp = 0.11
+#for cell in my_cells:
+    #stimClamp = h.IClamp(cell.soma(0.5))
+    #stimClamp.delay = 5
+    #stimClamp.dur = 100
+    #stimClamp.amp = 0.11
 '''
     else:
         stimClamp = h.IClamp(cell.soma(0.5))
