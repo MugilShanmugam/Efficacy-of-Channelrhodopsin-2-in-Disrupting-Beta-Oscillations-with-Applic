@@ -12,3 +12,6 @@ In the Foutz model, run OpticalStimulation.py.
 
 Step 2:
 Then run the "OpticalStimulationStripped.py" file in this repository.
+
+Step 3:
+Run PING_Model1.0 to access our network of excitatory and inhibitory cells.
