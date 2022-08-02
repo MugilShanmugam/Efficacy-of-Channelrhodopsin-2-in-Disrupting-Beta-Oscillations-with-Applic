@@ -13,7 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 
-
+num_cells = 5
 
 class Cell:         #Creation of a generic class called cell
     def __init__(self, gid, x, y, z, cell_type):  
@@ -99,16 +99,16 @@ def create_n_BallAndStick(n):
 
 
 #Setup connection matrix for a 4x4 and number of cells
-connection_matrix = np.ones((5,5))
+connection_matrix = np.ones((num_cells,num_cells))
 # E -> E = 1
 # E -> I = 1
 # I -> E = 0.5 of excitatories
 # All self connections = 0
 
-my_cells = create_n_BallAndStick(5)
+my_cells = create_n_BallAndStick(num_cells)
 h.topology()
 
-for i in range (0,5):
+for i in range (0,num_cells):
     connection_matrix[i][i] = 0         #Self connections
     
 
