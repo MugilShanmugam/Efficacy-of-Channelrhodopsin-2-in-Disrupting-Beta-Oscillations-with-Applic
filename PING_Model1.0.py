@@ -6,27 +6,51 @@ Created on Sat Jul 30 16:50:22 2022
 @author: Aiden Lee, Jeffrey Wen, Mugil Shanmugam, Dr. Bezaire
 """
 
-from neuron import h, gui
-from neuron.units import ms, mV
+from neuron import h
 h.load_file('stdrun.hoc')
+
+
+from neuron.units import ms, mV
+
 import numpy as np
 import matplotlib.pyplot as plt
 import random
 
+from OptoLight import OptoLight
+from Optrode import Optrode
+
 num_cells = 5
+distribution = 0.5 # expression level of channel rhodopsin
+exprtypes = 'e' # or 'ei' or 'i' or '',
+               # type of cell to express in
 
 simdur = 100 # ms duration of simulation
 clampdur = simdur # iclamp injects for duration of simulation
                   # but lags first 5 seconds or value of del parameter
+# optogenetics parameters
+h('absorbance_coefficient = 0.1249') # (1/mm) # Range: (0.05233, 0.1975)
+h('scatter_coefficient = 7.37')      # (1/mm) # Range: (6.679, 8.062)
+
+# clear any previously created cells:
+h('forall delete_section()')
 
 class Cell:         #Creation of a generic class called cell
     def __init__(self, gid, x, y, z, cell_type):  
         self._cell_type = cell_type
         self._gid = gid
+        self._express_cr = False
         if self._cell_type == 'e':
             self._cell_type = "Excitatory"
+            if 'e' in exprtypes:
+                self._express_cr = True # example: express
+                                    # channel rhodopsin
+                                    # only in excitatory
         else:
             self._cell_type = 'Inhibitory'
+            if 'i' in exprtypes:
+                self._express_cr = True # example: express
+                                    # channel rhodopsin
+                                    # only in excitatory            
         self._name = 'BallAndStick, {}'.format(self._cell_type)
         self._setup_morphology()
         self.all = self.soma.wholetree()    
@@ -47,6 +71,15 @@ class Cell:         #Creation of a generic class called cell
     def __repr__(self):
         return '{} [{}]'.format(self._name, self._gid)
             #Formatted so it will return name[gid(aka the neuron number)]
+
+    def seg_section_distance(self,seg,root_section=None):
+        """ Returns the distance between each segment of section, and the
+        root_section
+        """
+        if not root_section:root_section=self.soma
+        h.distance(0, root_section(0.5).x, sec=root_section)
+        return h.distance(seg.x, sec=seg.sec)
+
     def _set_position(self, x, y, z):
         for sec in [self.soma]: # all sections attached to soma will move automatically
             for i in range(sec.n3d()):
@@ -83,6 +116,7 @@ class BallAndStick(Cell):
         self.dend.L = 200
         self.dend.diam = 1
     def _setup_biophysics(self, cell_type):
+        self.fiberD=2.0 # for optogenetics
         for sec in self.all:
             sec.Ra = 100    # Axial resistance in Ohm * cm
             sec.cm = 1      # Membrane capacitance in micro Farads / cm^2
@@ -97,6 +131,25 @@ class BallAndStick(Cell):
         for seg in self.dend:
             seg.pas.g = 0.001  # Passive conductance in S/cm2
             seg.pas.e = -65    # Leak reversal potential mV
+
+        # add chanrhod mechanism to cells that express it:
+        max_distance = 0
+        if self._express_cr:
+            # assuming only one dendrite section
+            # if more, would need to iterate through
+            # whole dendrite list and insert into each
+            self.dend.insert("chanrhod")
+            self.lightmech = OptoLight(self)
+            for seg in self.dend:
+                max_distance = max([max_distance, self.seg_section_distance(seg)])
+                distance=self.seg_section_distance(seg)
+                if max_distance != 0: # check that not on soma
+                    s = (max_distance-distance)/(max_distance) # soma centric weighting
+                    a = (distance)/(max_distance)              # apical centric weighting
+                    W = distribution
+                    seg.channel_density_chanrhod  =  s*(1-W) + a*W
+
+
         
         #if cell_type == 'e':
         self.esyn = h.ExpSyn(self.dend(0.5))
@@ -158,8 +211,10 @@ for row in connection_matrix:
     for col in row:
         r.append('x ' if col > 0 else ' ')
     conmat.append(r)
-        
 
+print("Cells:")       
+print (*my_cells, sep="\n")
+print("\nConnections:")
 header = [c._cell_type[:3] + str(c._gid) for c in my_cells]
 import pandas as pd
 df = pd.DataFrame(conmat, 
@@ -261,25 +316,29 @@ leg = ax.legend();
 
 
 #Recording values
-print (*my_cells, sep="\n")
 for cell in my_cells:
     #recording_cell = my_cells[0]
     cell.vrec_soma = h.Vector().record(cell.soma(0.5)._ref_v)
     cell.vrec_dend = h.Vector().record(cell.dend(0.5)._ref_v)
     
 t = h.Vector().record(h._ref_t)
-        
+     
+LightSource = Optrode(my_cells[0].soma) # provide a section that the
+                                        # light source should be near
 
-#%% Plotting
+#%% Run simulation 
 h.finitialize(-65 * mV)
 h.continuerun(simdur * ms)
+
+
+#%% Plotting
 fig = plt.figure(figsize= (7,11))
 for i, cell in enumerate(my_cells):
     ax = fig.add_subplot(len(my_cells),1,i+1)
     plt.plot(t, cell.vrec_soma, label='soma(0.5)')
     plt.plot(t, cell.vrec_dend, label='dend(0.5)')
     plt.legend()
-    plt.title(cell._cell_type + ' ' + str(cell._gid))
+    plt.title(cell._cell_type + ' ' + str(cell._gid) + (" + channel rhodopsin" if cell._express_cr else ""))
     if i<(len(my_cells) - 1):
         plt.tick_params(axis='x', labelbottom=False) 
 
@@ -309,6 +368,7 @@ listosoma = [x.soma for x in my_cells]
 import riseplot as r
 r.plot(listosoma)
 
+print("Finished")
 
 
 
