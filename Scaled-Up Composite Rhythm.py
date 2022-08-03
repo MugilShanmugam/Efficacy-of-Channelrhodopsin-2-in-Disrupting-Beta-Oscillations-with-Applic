@@ -200,12 +200,12 @@ for row in con_loc:
     if source._cell_type == "Excitatory":
         nc = h.NetCon(source.soma(0.5)._ref_v, target.esyn, sec=source.soma)    #Still need help understanding netcons
         nc.weight[0] = 0.1    #strength of connection between pre and post cells (maximum conductance)
-        nc.delay = 5            #ms - delay between presynaptic cell reaching threshold and postsynaptic cell triggering (time to propogate down axon and NT)
+        nc.delay = 10            #ms - delay between presynaptic cell reaching threshold and postsynaptic cell triggering (time to propogate down axon and NT)
                                 #if planning to try to shorten frequency of gamma waves in ping model, probably mess around with tau (decay factor of synapse) rather than delay
     else: # Inhibitory
         nc = h.NetCon(source.soma(0.5)._ref_v, target.isyn, sec=source.soma)    #Still need help understanding netcons
         nc.weight[0] = 0.25    #strength of connection between pre and post cells (maximum conductance)
-        nc.delay = 5            #ms - delay between presynaptic cell reaching threshold and postsynaptic cell triggering (time to propogate down axon and NT)
+        nc.delay = 10            #ms - delay between presynaptic cell reaching threshold and postsynaptic cell triggering (time to propogate down axon and NT)
                                 #if planning to try to shorten frequency of gamma waves in ping model, probably mess around with tau (decay factor of synapse) rather than delay
 
     netcons.append(nc)
