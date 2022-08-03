@@ -19,8 +19,8 @@ import random
 from OptoLight import OptoLight
 from Optrode import Optrode
 
-num_cells = 5
-distribution = 0.5 # expression level of channel rhodopsin
+num_cells = 100
+distribution = 1.0 # expression level of channel rhodopsin
 exprtypes = 'e' # or 'ei' or 'i' or '',
                # type of cell to express in
 
@@ -336,7 +336,7 @@ h.continuerun(simdur * ms)
 for i, cell in enumerate(my_cells):
     #ax = fig.add_subplot(len(my_cells),1,i+1)
     plt.plot(t, cell.vrec_soma, label='soma(0.5)')
-    plt.plot(t, cell.vrec_dend, label='dend(0.5)')
+    #plt.plot(t, cell.vrec_dend, label='dend(0.5)')
     #plt.legend()
     plt.title("Composite Plot Rhythm")
     if i<(len(my_cells) - 1):
@@ -363,16 +363,18 @@ plt.xlabel("Time (ms)")
 plt.yticks(range(-inh,exc))
 plt.show()
 
-
+'''
 listosoma = [x.soma for x in my_cells]
 import riseplot as r
 r.plot(listosoma)
-
+'''
 print("Finished")
 
 
 
-
+#Work on adding time-labels to x axis
+#Issue: With 100 cells spikes taper off. 
+#riseplot not showing for 100 cells.
 
 
 
