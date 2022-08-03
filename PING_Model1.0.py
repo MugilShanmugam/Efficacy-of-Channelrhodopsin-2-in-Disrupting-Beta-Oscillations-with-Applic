@@ -15,6 +15,10 @@ import random
 
 num_cells = 5
 
+simdur = 100 # ms duration of simulation
+clampdur = simdur # iclamp injects for duration of simulation
+                  # but lags first 5 seconds or value of del parameter
+
 class Cell:         #Creation of a generic class called cell
     def __init__(self, gid, x, y, z, cell_type):  
         self._cell_type = cell_type
@@ -44,6 +48,15 @@ class Cell:         #Creation of a generic class called cell
         return '{} [{}]'.format(self._name, self._gid)
             #Formatted so it will return name[gid(aka the neuron number)]
     def _set_position(self, x, y, z):
+        for sec in [self.soma]: # all sections attached to soma will move automatically
+            for i in range(sec.n3d()):
+                sec.pt3dchange(
+                    i,
+                    x - self.x + sec.x3d(i),
+                    y - self.y + sec.y3d(i),
+                    z - self.z + sec.z3d(i),
+                    sec.diam3d(i),
+                )
         self.x, self.y, self.z = x, y, z
             
             
@@ -55,12 +68,12 @@ class BallAndStick(Cell):
         if cell_type == "e":
             self.stimClampE = h.IClamp(self.soma(0.5))
             self.stimClampE.delay = 5
-            self.stimClampE.dur = 100
+            self.stimClampE.dur = clampdur
             self.stimClampE.amp = 0.032
         else:
             self.stimClampI = h.IClamp(self.soma(0.5))
             self.stimClampI.delay = 5
-            self.stimClampI.dur = 100
+            self.stimClampI.dur = clampdur
             self.stimClampI.amp = 0.032
     def _setup_morphology(self):
         self.soma = h.Section(name='soma', cell=self)
@@ -104,9 +117,9 @@ def create_n_BallAndStick(n):
     """n = number of cells; r = radius of circle"""
     cells = []
     for i in range(int(0.80*n)):
-        cells.append(BallAndStick(i, 50*i, 0, 0, 'e'))
+        cells.append(BallAndStick(i, 0, 50*i, 0, 'e'))
     for i in range(int(0.20*n)):
-        cells.append(BallAndStick(i, 50*i, 0, 0, 'i'))
+        cells.append(BallAndStick(i, 0, -50*(i+1), 0, 'i'))
     return cells
 
 
@@ -118,7 +131,7 @@ connection_matrix = np.ones((num_cells,num_cells))
 # All self connections = 0
 
 my_cells = create_n_BallAndStick(num_cells)
-h.topology()
+# h.topology()
 
 for i in range (0,num_cells):
     connection_matrix[i][i] = 0         #Self connections
@@ -138,8 +151,22 @@ for i, cell in enumerate(my_cells):
                 
             
 
-print(connection_matrix)
-    
+# print(connection_matrix)
+conmat = []
+for row in connection_matrix:
+    r = []
+    for col in row:
+        r.append('x ' if col > 0 else ' ')
+    conmat.append(r)
+        
+
+header = [c._cell_type[:3] + str(c._gid) for c in my_cells]
+import pandas as pd
+df = pd.DataFrame(conmat, 
+                  columns = header, 
+                  index=header)
+print('Pre |            Post')
+print(df)
 
 #Set up stimulations
 
@@ -234,7 +261,7 @@ leg = ax.legend();
 
 
 #Recording values
-print (my_cells)
+print (*my_cells, sep="\n")
 for cell in my_cells:
     #recording_cell = my_cells[0]
     cell.vrec_soma = h.Vector().record(cell.soma(0.5)._ref_v)
@@ -245,7 +272,7 @@ t = h.Vector().record(h._ref_t)
 
 #%% Plotting
 h.finitialize(-65 * mV)
-h.continuerun(100 * ms)
+h.continuerun(simdur * ms)
 fig = plt.figure(figsize= (7,11))
 for i, cell in enumerate(my_cells):
     ax = fig.add_subplot(len(my_cells),1,i+1)
@@ -267,7 +294,7 @@ for cell in my_cells:
         exc += 1
     else:
         inh += 1
-    print(cell._gid if cell._cell_type == "Excitatory" else -cell._gid)
+    # print(cell._gid if cell._cell_type == "Excitatory" else -cell._gid)
     gidvec = [cell._gid if cell._cell_type == "Excitatory" else -1-cell._gid]*len(cell.spike_times)  
     plt.plot(cell.spike_times, gidvec, marker = 'o', linestyle="None", color = 'b' if cell._cell_type == "Excitatory" else 'r')    
 
@@ -278,7 +305,9 @@ plt.yticks(range(-inh,exc))
 plt.show()
 
 
-
+listosoma = [x.soma for x in my_cells]
+import riseplot as r
+r.plot(listosoma)
 
 
 
