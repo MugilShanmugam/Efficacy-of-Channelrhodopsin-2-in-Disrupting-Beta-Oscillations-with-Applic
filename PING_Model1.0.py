@@ -19,12 +19,12 @@ import random
 from OptoLight import OptoLight
 from Optrode import Optrode
 
-num_cells = 5
+num_cells = 100
 distribution = 0.5 # expression level of channel rhodopsin
-exprtypes = 'e' # or 'ei' or 'i' or '',
+exprtypes = '' # or 'ei' or 'i' or '',
                # type of cell to express in
 
-simdur = 500 # ms duration of simulation
+simdur = 100 # ms duration of simulation
 clampdur = simdur # iclamp injects for duration of simulation
                   # but lags first 5 seconds or value of del parameter
 # optogenetics parameters
@@ -280,13 +280,13 @@ for row in con_loc:
    # syn = h.ExpSyn(target.dend(0.5))   #syn is the synapse and later appended to list syns
     if source._cell_type == "Excitatory":
         nc = h.NetCon(source.soma(0.5)._ref_v, target.esyn, sec=source.soma)    #Still need help understanding netcons
-        nc.weight[0] = 0.1    #strength of connection between pre and post cells (maximum conductance)
-        nc.delay = 50            #ms - delay between presynaptic cell reaching threshold and postsynaptic cell triggering (time to propogate down axon and NT)
+        nc.weight[0] = random.gauss(0.1, 0.05)  #strength of connection between pre and post cells (maximum conductance)
+        nc.delay = 5            #ms - delay between presynaptic cell reaching threshold and postsynaptic cell triggering (time to propogate down axon and NT)
                                 #if planning to try to shorten frequency of gamma waves in ping model, probably mess around with tau (decay factor of synapse) rather than delay
     else: # Inhibitory
         nc = h.NetCon(source.soma(0.5)._ref_v, target.isyn, sec=source.soma)    #Still need help understanding netcons
-        nc.weight[0] = 0.8    #strength of connection between pre and post cells (maximum conductance)
-        nc.delay = 50            #ms - delay between presynaptic cell reaching threshold and postsynaptic cell triggering (time to propogate down axon and NT)
+        nc.weight[0] = random.gauss(0.35, 0.10)    #strength of connection between pre and post cells (maximum conductance)
+        nc.delay = 5            #ms - delay between presynaptic cell reaching threshold and postsynaptic cell triggering (time to propogate down axon and NT)
                                 #if planning to try to shorten frequency of gamma waves in ping model, probably mess around with tau (decay factor of synapse) rather than delay
 
     netcons.append(nc)
