@@ -13,7 +13,7 @@ NEURON { :public interface of the mechanism
 	:Name of the Channel
     NONSPECIFIC_CURRENT	icat
     :Specific Channel for Na, Ca, K
-    RANGE photons, flux, irradiance, U, U0, U1
+    RANGE photons, flux, irradiance, U, U0, U1, icat
     :Calculated optics values given source_values
     RANGE channel_density, gdens1, gdens2
     :Channel density and conductance. gdens1 = density conductance for o1. gdens2 = density conductance for o2

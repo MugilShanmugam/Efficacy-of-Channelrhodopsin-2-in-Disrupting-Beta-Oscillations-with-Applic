@@ -8,12 +8,12 @@ Created on Sat Jul 30 16:50:22 2022
 from neuron import h, gui
 from neuron.units import ms, mV
 h.load_file('stdrun.hoc')
-runtime = 1000
+runtime = 100
 thresh = -10
 h.dt = 0.025
 nsegval = 5
 distribution = 0.5 # expression level of channel rhodopsin
-exprtypes = '' # or 'ei' or 'i' or '',
+exprtypes = 'e' # or 'ei' or 'i' or '',
                # type of cell to express in
 # optogenetics parameters
 h('absorbance_coefficient = 0.1249') # (1/mm) # Range: (0.05233, 0.1975)
@@ -75,7 +75,7 @@ class Cell:         #Creation of a generic class called cell
         if not root_section:root_section=self.soma
         h.distance(0, root_section(0.5).x, sec=root_section)
         return h.distance(seg.x, sec=seg.sec)
-            
+crg = [] # TODO - are the values reasonable?            
 class BallAndStick(Cell):
     #Creation of subclass under cell so BallAndStick will have methods defined under both Cell and BallAndStick
     #Both init and repr removed because they are already defined in Cell
@@ -148,6 +148,7 @@ class BallAndStick(Cell):
                     a = (distance)/(max_distance)              # apical centric weighting
                     W = distribution
                     seg.channel_density_chanrhod  =  s*(1-W) + a*W
+                    crg.append(seg.channel_density_chanrhod)
             
 def create_n_BallAndStick(n):
     """n = number of cells; r = radius of circle"""
@@ -222,6 +223,15 @@ for row in con_loc:
 for cell in my_cells:
     cell.vrec_soma = h.Vector().record(cell.soma(0.5)._ref_v)
     cell.vrec_dend = h.Vector().record(cell.dend(0.5)._ref_v) 
+    if cell._cell_type[0].lower() in exprtypes:  
+        cell.icat = h.Vector().record(cell.dend(0.5).chanrhod._ref_icat)
+        cell.flux = h.Vector().record(cell.dend(0.5).chanrhod._ref_flux)
+        cell.irradiance = h.Vector().record(cell.dend(0.5).chanrhod._ref_irradiance)
+    else:
+        cell.icat = []
+        cell.flux = []
+        cell.irradiance = []
+
 t = h.Vector().record(h._ref_t)
         
 soma_Vms = np.zeros(int(runtime/h.dt)+1)
