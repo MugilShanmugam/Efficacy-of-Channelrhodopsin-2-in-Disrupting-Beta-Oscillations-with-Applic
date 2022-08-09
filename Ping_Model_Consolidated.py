@@ -8,11 +8,11 @@ Created on Sat Jul 30 16:50:22 2022
 from neuron import h, gui
 from neuron.units import ms, mV
 h.load_file('stdrun.hoc')
-runtime = 100
+runtime = 1000
 thresh = -10
 h.dt = 0.025
 nsegval = 5
-distribution = 0.5 # expression level of channel rhodopsin
+distribution = 5000 # expression level of channel rhodopsin
 exprtypes = 'e' # or 'ei' or 'i' or '',
                # type of cell to express in
 # optogenetics parameters
@@ -236,11 +236,13 @@ t = h.Vector().record(h._ref_t)
         
 soma_Vms = np.zeros(int(runtime/h.dt)+1)
 dend_Vms = np.zeros(int(runtime/h.dt)+1)
-#%% 
-LightSource = Optrode(my_cells[0].soma) # provide a section that the
+#%%  place the optrode for chnnel rhodopsin activation
+LightSource = Optrode(my_cells[40].soma) # provide a section that the
                                         # light source should be near
 
-
+# after running, check out or graph:
+# for i in range(80):
+#     print(max(my_cells[i].icat))
 #%%
 # Plotting
 h.tstop = runtime
@@ -308,6 +310,8 @@ plt.xlim((999/runtime)*2, 100)
 #plt.ylim(0,20000)
 #%%
 # Implementing bandpower
+# X: soma
+# dendX: dendrite
 fft_results = np.abs(dendX) # MB updated 
 beta_range = []
 for i,frequency in enumerate(dend_freq): # MB updated 
