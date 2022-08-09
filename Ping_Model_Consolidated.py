@@ -3,7 +3,7 @@
 """
 Created on Sat Jul 30 16:50:22 2022
 
-@author: Aidan Lee, Jeffrey Wen, Mugil Shanmugam
+@author: Aiden Lee, Jeffrey Wen, Mugil Shanmugam
 """
 from neuron import h, gui
 from neuron.units import ms, mV
