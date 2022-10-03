@@ -22,4 +22,4 @@ Step 3:
 Run PING_Model1.0.py to access our network of excitatory and inhibitory cells. Run Scaled-Up Composite Rhythm.py to see all the spiking of the 100 neurons in the network on one graph.
 
 Step 4:
-Run 
+Run Ping_Model_Consolidated.py for our final code, from which we created the graphs seen in our abstract. The ChR2 code from the Foutz model is also implemented in this model.
